@@ -6,7 +6,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 // Lazy loading ile sayfa bileşenlerini dinamik olarak içe aktar
 // Bu, ilk yükleme boyutunu küçültür ve performansı artırır
 const HomePage = lazy(() => import('@/pages/Home/HomePage'));
-const ListsPage = lazy(() => import('@/pages/Lists/ListsPage'));
+const ListsPage = lazy(() => import('@/pages/Lists/listspage'));
 const DiscoverPage = lazy(() => import('@/pages/Discover/DiscoverPage'));
 const ContentDetailPage = lazy(() => import('@/pages/ContentDetail/ContentDetailPage'));
 const LoginPage = lazy(() => import('@/pages/Auth/LoginPage'));
