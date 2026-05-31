@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { contentApi, langFromI18n } from '@/api/content.api';
 import { backdrop, poster, profile, youtubeEmbed, youtubeThumb } from '@/lib/tmdb';
 import { RatingStars } from '@/components/content/RatingStars';
+import { ContentCard } from '@/components/content/ContentCard';
 import { ReviewsSection } from '@/features/reviews/ReviewsSection';
 import type { TmdbType } from '@/types/content';
 
@@ -165,6 +166,18 @@ export default function ContentDetailPage({ type }: ContentDetailPageProps) {
                   <p className="truncate text-xs text-ink-muted">{member.character}</p>
                 </div>
               </article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Benzer / önerilen içerikler */}
+      {data.recommendations.length > 0 && (
+        <section>
+          <div className="section-title"><h2>{t('content.similar')}</h2></div>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6">
+            {data.recommendations.map((item) => (
+              <ContentCard key={`${item.type}-${item.id}`} item={item} showType />
             ))}
           </div>
         </section>
