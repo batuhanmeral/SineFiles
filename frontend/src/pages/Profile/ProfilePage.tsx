@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { apiClient } from '@/api/client';
 import { useAuthStore } from '@/features/auth/authStore';
 import { FavoritesSection } from './FavoritesSection';
+import { UserReviewsSection } from './UserReviewsSection';
 
 // Herkese açık kullanıcı profil verisi arayüzü
 interface PublicProfile {
@@ -110,7 +111,11 @@ export default function ProfilePage() {
           <div className="lg:w-[30%] lg:self-stretch lg:border-l lg:border-white/10 lg:pl-6">
             <div className="grid grid-cols-2 gap-3 text-center">
               <Stat label={t('profile.watched')} value={watchedCount} />
-              <Stat label={t('profile.reviews')} value={data._count.reviews} />
+              <Stat
+                label={t('profile.reviews')}
+                value={data._count.reviews}
+                to={`/u/${data.username}/reviews`}
+              />
               <Stat label={t('profile.followers')} value={data._count.followers} />
               <Stat label={t('profile.following')} value={data._count.following} />
             </div>
@@ -120,16 +125,33 @@ export default function ProfilePage() {
 
       {/* Favoriler: öne çıkan içerikler, oyuncu ve yönetmen */}
       <FavoritesSection username={data.username} />
+
+      {/* Kullanıcının yazdığı incelemeler */}
+      <UserReviewsSection username={data.username} />
     </div>
   );
 }
 
-// İstatistik göstergesi bileşeni (izlenen, inceleme, takipçi, takip sayıları)
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div>
+// İstatistik göstergesi bileşeni (izlenen, inceleme, takipçi, takip sayıları).
+// `to` verilirse tıklanabilir bir bağlantıya dönüşür.
+function Stat({ label, value, to }: { label: string; value: number; to?: string }) {
+  const content = (
+    <>
       <div className="font-display text-xl font-bold text-ink">{value}</div>
       <div className="text-xs uppercase tracking-wider text-ink-muted">{label}</div>
-    </div>
+    </>
+  );
+
+  if (!to) {
+    return <div>{content}</div>;
+  }
+
+  return (
+    <Link
+      to={to}
+      className="rounded-lg transition hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+    >
+      {content}
+    </Link>
   );
 }

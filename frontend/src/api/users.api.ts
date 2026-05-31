@@ -1,6 +1,7 @@
 import { apiClient } from './client';
 import type { AuthUser, FavoriteContentRef, Language } from '@/types/auth';
 import type { Lang, UserFavorites } from '@/types/content';
+import type { PopularReview } from './reviews.api';
 
 // Profil güncelleme için girdi alanları
 export interface UpdateMeInput {
@@ -53,6 +54,14 @@ export const usersApi = {
   favorites: async (username: string, language: Lang): Promise<UserFavorites> => {
     const { data } = await apiClient.get<UserFavorites>(`/users/${username}/favorites`, {
       params: { language },
+    });
+    return data;
+  },
+
+  // Bir kullanıcının yazdığı incelemeleri (içerik bilgisiyle) getirir
+  reviews: async (username: string, limit = 20): Promise<PopularReview[]> => {
+    const { data } = await apiClient.get<PopularReview[]>(`/users/${username}/reviews`, {
+      params: { limit },
     });
     return data;
   },

@@ -144,6 +144,14 @@
     "remove": "Kaldır",
     "save": "Favorileri Kaydet"
   },
+  "userReviews": {
+    "title": "İncelemeler",
+    "empty": "Bu kullanıcı henüz inceleme yazmamış.",
+    "spoiler": "⚠ Spoiler içeriyor",
+    "showMore": "Daha fazla göster",
+    "allTitle": "Tüm İncelemeler",
+    "backToProfile": "Profile dön"
+  },
   "settings": {
     "title": "Ayarlar",
     "subtitle": "Hesap ve uygulama tercihlerini yönet.",

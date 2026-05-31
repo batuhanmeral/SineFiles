@@ -1,7 +1,7 @@
 import { Router, type RequestHandler } from 'express';
 
 import { prisma } from '../../config/db.js';
-import { requireAuth } from '../../middleware/auth.middleware.js';
+import { optionalAuth, requireAuth } from '../../middleware/auth.middleware.js';
 import { validate } from '../../middleware/validate.middleware.js';
 import { hashPassword, verifyPassword } from '../../utils/password.js';
 import {
@@ -11,6 +11,7 @@ import {
   UnauthorizedError,
 } from '../../utils/errors.js';
 import * as tmdb from '../../services/tmdb.service.js';
+import { listReviewsByUser } from '../reviews/reviews.service.js';
 import { changePasswordSchema, updateMeSchema } from './users.validator.js';
 
 export const usersRouter = Router();
@@ -203,6 +204,25 @@ const getFavorites: RequestHandler = async (req, res, next) => {
   }
 };
 
+// Bir kullanıcının yazdığı incelemeleri (içerik bilgisiyle) listeler
+const getReviews: RequestHandler = async (req, res, next) => {
+  try {
+    const username = (req.params.username ?? '').toLowerCase();
+    const limit = Math.min(Number(req.query.limit ?? 20), 50);
+
+    const user = await prisma.user.findUnique({
+      where: { username },
+      select: { id: true },
+    });
+    if (!user) throw new NotFoundError('Kullanıcı bulunamadı');
+
+    const reviews = await listReviewsByUser(user.id, limit, req.auth?.sub);
+    res.json(reviews);
+  } catch (err) {
+    next(err);
+  }
+};
+
 usersRouter.get('/me', requireAuth, getMe);
 usersRouter.patch('/me', requireAuth, validate(updateMeSchema), updateMe);
 
@@ -213,7 +233,8 @@ usersRouter.post(
   changePassword,
 );
 usersRouter.delete('/me', requireAuth, deleteMe);
-// Not: /:username/favorites, /:username'den önce tanımlanmalı
+// Not: /:username/* alt rotaları /:username'den önce tanımlanmalı
 usersRouter.get('/:username/favorites', getFavorites);
+usersRouter.get('/:username/reviews', optionalAuth, getReviews);
 usersRouter.get('/:username', getByUsername);
 

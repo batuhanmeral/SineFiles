@@ -144,6 +144,14 @@
     "remove": "Remove",
     "save": "Save Favorites"
   },
+  "userReviews": {
+    "title": "Reviews",
+    "empty": "This user hasn't written any reviews yet.",
+    "spoiler": "⚠ Contains spoiler",
+    "showMore": "Show more",
+    "allTitle": "All Reviews",
+    "backToProfile": "Back to profile"
+  },
   "settings": {
     "title": "Settings",
     "subtitle": "Manage your account and app preferences.",
