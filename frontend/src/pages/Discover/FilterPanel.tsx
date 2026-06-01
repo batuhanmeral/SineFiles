@@ -42,9 +42,6 @@ export function FilterPanel({ values, onChange, genres }: Props) {
   const set = <K extends keyof DiscoverFilterValues>(k: K, v: DiscoverFilterValues[K]) =>
     onChange({ ...values, [k]: v });
 
-  // İçerik (yapım) filtreleri yalnızca "titles" kapsamında etkin
-  const titlesActive = values.scope === 'titles';
-
   return (
     <aside className="card sticky top-20 space-y-5 self-start">
       {/* Panel başlığı */}
@@ -93,15 +90,10 @@ export function FilterPanel({ values, onChange, genres }: Props) {
         </Field>
       )}
 
-      {/* İçerik (yapım) filtreleri — yalnızca "Yapımlar" kapsamında etkin.
-          Kişiler/Kullanıcılar seçiliyse görsel olarak soluk ve devre dışı. */}
-      <fieldset
-        disabled={!titlesActive}
-        className={
-          'space-y-5 border-0 p-0 transition-opacity ' +
-          (titlesActive ? 'opacity-100' : 'pointer-events-none opacity-40')
-        }
-      >
+      {/* İçerik (yapım) filtreleri — yalnızca "Yapımlar" kapsamında gösterilir.
+          Kişiler/Kullanıcılar seçiliyse tamamen gizlenir. */}
+      {values.scope === 'titles' && (
+      <div className="space-y-5">
         {/* İçerik türü seçimi: Film / Dizi */}
         <Field label={t('discover.filters.type')}>
           <div className="grid grid-cols-2 gap-1 rounded-lg bg-surface p-1 ring-1 ring-white/5">
@@ -162,7 +154,8 @@ export function FilterPanel({ values, onChange, genres }: Props) {
             className="w-full accent-accent"
           />
         </Field>
-      </fieldset>
+      </div>
+      )}
 
       {/* Filtreleri sıfırla butonu */}
       <button

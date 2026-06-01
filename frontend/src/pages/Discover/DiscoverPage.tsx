@@ -12,11 +12,6 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { FilterPanel, type DiscoverFilterValues } from './FilterPanel';
 import type { ContentPage } from '@/types/content';
 
-// "Yapımlar" görünümünde ikincil bölümlerde (kişiler/kullanıcılar) gösterilecek
-// önizleme adedi — yaklaşık 2 satırı dolduracak şekilde sınırlanır.
-const PEOPLE_PREVIEW = 16;
-const USERS_PREVIEW = 12;
-
 // Keşfet sayfası bileşeni
 // Yapım / kişi / kullanıcı keşfetme, filtreleme ve arama işlevselliği sağlar.
 // Sol paneldeki "kapsam" seçimine göre hangi sonuçların gösterileceği belirlenir.
@@ -48,8 +43,8 @@ export default function DiscoverPage() {
 
   const scope = filters.scope;
   const showTitles = scope === 'titles';
-  const showPeople = scope === 'titles' || scope === 'people';
-  const showUsers = scope === 'titles' || scope === 'users';
+  const showPeople = scope === 'people';
+  const showUsers = scope === 'users';
 
   // Seçili türe göre tür (genre) listesini getir
   const genresQuery = useQuery({
@@ -96,11 +91,6 @@ export default function DiscoverPage() {
   }, [peopleQuery.data, filters.personDept]);
 
   const users = usersQuery.data ?? [];
-
-  // "Yapımlar" görünümünde ikincil bölümler önizleme adediyle sınırlanır;
-  // kendi kapsamlarında ise tüm sonuçlar gösterilir.
-  const peopleShown = showTitles ? people.slice(0, PEOPLE_PREVIEW) : people;
-  const usersShown = showTitles ? users.slice(0, USERS_PREVIEW) : users;
 
   // Tüm sayfaların sonuçlarını tek bir diziye düzleştir
   const items = useMemo(() => list.data?.pages.flatMap((p) => p.results) ?? [], [list.data]);
@@ -167,32 +157,32 @@ export default function DiscoverPage() {
         )}
 
         {/* ── KİŞİLER ───────────────────────────────────────────────── */}
-        {showPeople && isSearching && peopleShown.length > 0 && (
+        {showPeople && isSearching && people.length > 0 && (
           <section className="space-y-3">
             <h2 className="font-display text-lg font-bold text-ink">{t('discover.people')}</h2>
             <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-8">
-              {peopleShown.map((p) => (
+              {people.map((p) => (
                 <PersonCard key={p.id} person={p} />
               ))}
             </div>
           </section>
         )}
-        {scope === 'people' && isSearching && peopleShown.length === 0 && (
+        {showPeople && isSearching && people.length === 0 && (
           <div className="card text-center text-ink-muted">{t('discover.empty')}</div>
         )}
 
         {/* ── KULLANICILAR ──────────────────────────────────────────── */}
-        {showUsers && isSearching && usersShown.length > 0 && (
+        {showUsers && isSearching && users.length > 0 && (
           <section className="space-y-3">
             <h2 className="font-display text-lg font-bold text-ink">{t('discover.users')}</h2>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6">
-              {usersShown.map((u) => (
+              {users.map((u) => (
                 <UserCard key={u.id} user={u} />
               ))}
             </div>
           </section>
         )}
-        {scope === 'users' && isSearching && usersShown.length === 0 && (
+        {showUsers && isSearching && users.length === 0 && (
           <div className="card text-center text-ink-muted">{t('discover.empty')}</div>
         )}
       </div>
