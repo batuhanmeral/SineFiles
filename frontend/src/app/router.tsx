@@ -2,6 +2,10 @@ import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { RootLayout } from '@/components/layout/RootLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { AdminLayout } from '@/pages/admin/AdminLayout';
+import { AdminDashboard } from '@/pages/admin/AdminDashboard';
+import { AdminUsers } from '@/pages/admin/AdminUsers';
+import { AdminContent } from '@/pages/admin/AdminContent';
 
 // Lazy loading ile sayfa bileşenlerini dinamik olarak içe aktar
 // Bu, ilk yükleme boyutunu küçültür ve performansı artırır
@@ -30,6 +34,13 @@ export function AppRouter() {
   return (
     <Suspense fallback={<PageFallback />}>
       <Routes>
+        {/* ADMIN ROTALARI */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route path="" element={<AdminDashboard />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="content" element={<AdminContent />} />
+        </Route>
+
         {/* Tüm sayfalar RootLayout (navbar + footer) içinde render edilir */}
         <Route element={<RootLayout />}>
           {/* Ana sayfa */}
@@ -48,7 +59,6 @@ export function AppRouter() {
           <Route path="/tv/:tmdbId" element={<ContentDetailPage type="tv" />} />
           {/* Giriş ve kayıt sayfaları */}
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
           {/* Kullanıcı profil sayfası - username parametresi ile */}
           <Route path="/u/:username" element={<ProfilePage />} />
           {/* Kullanıcının tüm incelemeleri */}
