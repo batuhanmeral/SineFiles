@@ -101,20 +101,22 @@ export async function register(input: RegisterInput): Promise<AuthResult> {
           displayName: input.displayName,
         },
       });
-      // Sistem listelerini otomatik oluştur
+      // Sistem listelerini otomatik oluştur.
+      // İzlenenler ve İzleme Listesi profilden erişilebilsin diye herkese açık;
+      // Favoriler özel (profilde ayrı "Favoriler" bölümü zaten gösteriliyor).
       await tx.list.createMany({
         data: [
           {
             userId: created.id,
             type: ListType.WATCHED,
             title: 'Watched',
-            visibility: Visibility.PRIVATE,
+            visibility: Visibility.PUBLIC,
           },
           {
             userId: created.id,
             type: ListType.WATCHLIST,
             title: 'Watchlist',
-            visibility: Visibility.PRIVATE,
+            visibility: Visibility.PUBLIC,
           },
           {
             userId: created.id,
