@@ -46,6 +46,7 @@ export function ContentListActions({ tmdbId, type }: Props) {
 
   const watched = lists?.find((l) => l.type === 'WATCHED');
   const watchlist = lists?.find((l) => l.type === 'WATCHLIST');
+  const favorites = lists?.find((l) => l.type === 'FAVORITES');
 
   // Tek-tık sistem listesi butonu (aktifse accent dolu)
   const quickButton = (list: MyListSummary | undefined, activeText: string, idleText: string) => {
@@ -63,10 +64,31 @@ export function ContentListActions({ tmdbId, type }: Props) {
     );
   };
 
+  // Favorilere ekle/çıkar — kalp ikonu (dolu kırmızı = favorilerde)
+  const favoriteButton = () => {
+    if (!favorites) return null;
+    const active = Boolean(favorites.itemId);
+    return (
+      <button
+        type="button"
+        onClick={() => toggle.mutate(favorites)}
+        disabled={toggle.isPending}
+        aria-label={active ? 'Favorilerden çıkar' : 'Favorilere ekle'}
+        title={active ? 'Favorilerden çıkar' : 'Favorilere ekle'}
+        className={`btn-outline px-3 text-lg leading-none disabled:opacity-50 ${
+          active ? 'border-rating-low text-rating-low hover:text-rating-low' : ''
+        }`}
+      >
+        {active ? '❤️' : '🤍'}
+      </button>
+    );
+  };
+
   return (
     <>
       {quickButton(watched, 'İzledim', '＋ İzledim')}
       {quickButton(watchlist, 'İzleme Listemde', '＋ İzleyeceğim')}
+      {favoriteButton()}
 
       {/* Tüm listeler için açılır menü */}
       <Dropdown

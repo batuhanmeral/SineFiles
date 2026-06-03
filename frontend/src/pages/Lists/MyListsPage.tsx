@@ -53,10 +53,10 @@ export default function MyListsPage() {
             >
               <Link to={`/lists/${list.id}`} className="block">
                 <div className="flex items-center gap-2">
+                  <span className="text-xs">{list.visibility === 'PUBLIC' ? '🌐' : '🔒'}</span>
                   <h3 className="truncate font-semibold text-ink group-hover:text-accent">
                     {listDisplayName(list, t)}
                   </h3>
-                  <span className="text-xs">{list.visibility === 'PUBLIC' ? '🌐' : '🔒'}</span>
                 </div>
                 {list.description && (
                   <p className="mt-1 line-clamp-2 text-sm text-ink-muted">{list.description}</p>

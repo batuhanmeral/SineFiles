@@ -1,77 +1,128 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { poster } from '@/lib/tmdb';
-import { listsApi } from '@/api/lists.api';
+import { listsApi, type UserListSummary } from '@/api/lists.api';
 import { listDisplayName } from '@/features/list/listLabels';
 
-// Profil sayfasında kullanıcının listelerini gösteren bölüm.
-// Başkası bakıyorsa yalnızca herkese açık listeler; sahibi ise özeller de gelir (backend).
+// Sistem listesi ikonları ve sabit gösterim sırası
+const systemEmoji: Record<string, string> = {
+  WATCHED: '✅',
+  WATCHLIST: '📋',
+  FAVORITES: '❤️',
+};
+const SYSTEM_ORDER = ['WATCHED', 'WATCHLIST', 'FAVORITES'] as const;
+
+// Profilde gösterilecek azami CUSTOM liste sayısı (fazlası "Tümünü göster" ile)
+const CUSTOM_PREVIEW = 3;
+
+// Profil sayfasında kullanıcının listeleri.
+// Zorunlu sistem listeleri (İzlenenler/İzleme Listesi/Favoriler) üstte ikon kısayolları
+// olarak; kullanıcının kendi (CUSTOM) listeleri kart olarak, en fazla 3 — gerisi
+// "Tümünü göster" ile açılır. Başkası bakıyorsa yalnızca herkese açık listeler gelir.
 export function ProfileListsSection({ username }: { username: string }) {
   const { t } = useTranslation();
+  const [showAll, setShowAll] = useState(false);
+
   const { data: lists } = useQuery({
     queryKey: ['user-lists', username],
     queryFn: () => listsApi.userLists(username),
     enabled: Boolean(username),
   });
 
-  // İzlenenler ve İzleme Listesi her zaman gösterilir (zorunlu/erişilebilir listeler);
-  // Favoriler ve diğerleri yalnızca içerik varsa, CUSTOM listeler her zaman.
-  const visible = (lists ?? []).filter(
-    (l) =>
-      l.type === 'WATCHED' ||
-      l.type === 'WATCHLIST' ||
-      l.type === 'CUSTOM' ||
-      l.itemCount > 0,
+  const all = lists ?? [];
+  // Sistem listeleri sabit sırada
+  const system = SYSTEM_ORDER.map((ty) => all.find((l) => l.type === ty)).filter(
+    (l): l is UserListSummary => Boolean(l),
   );
-  if (visible.length === 0) return null;
+  const custom = all.filter((l) => l.type === 'CUSTOM');
+
+  if (system.length === 0 && custom.length === 0) return null;
+
+  const shownCustom = showAll ? custom : custom.slice(0, CUSTOM_PREVIEW);
 
   return (
     <section className="mt-8">
       <h2 className="mb-3 font-display text-lg font-bold text-ink">Listeler</h2>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {visible.map((list) => (
-          <Link
-            key={list.id}
-            to={`/lists/${list.id}`}
-            className="group rounded-2xl border border-white/10 bg-surface-raised p-4 transition-all hover:border-white/20"
-          >
-            {/* Poster önizleme şeridi */}
-            <div className="grid aspect-[16/9] grid-cols-4 gap-0.5 overflow-hidden rounded-xl ring-1 ring-white/10">
-              {list.previewPosters.length > 0 ? (
-                list.previewPosters.slice(0, 4).map((p, i) => {
-                  const url = poster(p, 'w185');
-                  return (
-                    <div key={i} className="h-full overflow-hidden">
-                      {url ? (
-                        <img src={url} alt="" className="h-full w-full object-cover" loading="lazy" />
-                      ) : (
-                        <div className="h-full w-full bg-surface-muted" />
-                      )}
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="col-span-4 grid place-items-center bg-surface-muted text-xs text-ink-muted">
-                  Boş liste
-                </div>
-              )}
-            </div>
 
-            <div className="mt-3 flex items-center gap-2">
-              <h3 className="truncate font-semibold text-ink group-hover:text-accent">
-                {listDisplayName(list, t)}
-              </h3>
-              <span className="text-xs">{list.visibility === 'PUBLIC' ? '🌐' : '🔒'}</span>
+      {/* Sistem listeleri — ikon kısayolları */}
+      {system.length > 0 && (
+        <div className="mb-5 flex flex-wrap gap-2">
+          {system.map((list) => (
+            <Link
+              key={list.id}
+              to={`/lists/${list.id}`}
+              className="flex items-center gap-2 rounded-xl border border-white/10 bg-surface-raised px-4 py-2 text-sm transition-all hover:border-white/20"
+            >
+              <span className="text-base">{systemEmoji[list.type]}</span>
+              <span className="font-medium text-ink">{listDisplayName(list, t)}</span>
+              <span className="text-xs text-ink-muted">{list.itemCount}</span>
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {/* CUSTOM listeler — kartlar (en fazla 3) */}
+      {custom.length > 0 && (
+        <>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {shownCustom.map((list) => (
+              <Link
+                key={list.id}
+                to={`/lists/${list.id}`}
+                className="group rounded-2xl border border-white/10 bg-surface-raised p-4 transition-all hover:border-white/20"
+              >
+                {/* Poster önizleme şeridi */}
+                <div className="grid aspect-[16/9] grid-cols-4 gap-0.5 overflow-hidden rounded-xl ring-1 ring-white/10">
+                  {list.previewPosters.length > 0 ? (
+                    list.previewPosters.slice(0, 4).map((p, i) => {
+                      const url = poster(p, 'w185');
+                      return (
+                        <div key={i} className="h-full overflow-hidden">
+                          {url ? (
+                            <img src={url} alt="" className="h-full w-full object-cover" loading="lazy" />
+                          ) : (
+                            <div className="h-full w-full bg-surface-muted" />
+                          )}
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="col-span-4 grid place-items-center bg-surface-muted text-xs text-ink-muted">
+                      Boş liste
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="text-xs">{list.visibility === 'PUBLIC' ? '🌐' : '🔒'}</span>
+                  <h3 className="truncate font-semibold text-ink group-hover:text-accent">
+                    {listDisplayName(list, t)}
+                  </h3>
+                </div>
+                <div className="mt-1 flex gap-3 text-xs text-ink-muted">
+                  <span>{list.itemCount} içerik</span>
+                  <span>·</span>
+                  <span>{list.likeCount} beğeni</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* 3'ten fazlaysa tümünü göster/gizle */}
+          {custom.length > CUSTOM_PREVIEW && (
+            <div className="mt-4 text-center">
+              <button
+                onClick={() => setShowAll((v) => !v)}
+                className="rounded-lg bg-white/10 px-5 py-2 text-sm font-semibold text-ink transition-all hover:bg-white/20"
+              >
+                {showAll ? 'Daha az göster' : `Tümünü göster (${custom.length})`}
+              </button>
             </div>
-            <div className="mt-1 flex gap-3 text-xs text-ink-muted">
-              <span>{list.itemCount} içerik</span>
-              <span>·</span>
-              <span>{list.likeCount} beğeni</span>
-            </div>
-          </Link>
-        ))}
-      </div>
+          )}
+        </>
+      )}
     </section>
   );
 }
