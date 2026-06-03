@@ -91,15 +91,15 @@ export default function ListDetailPage() {
 
   return (
     <div className="min-h-screen bg-surface">
-      <ListHeader
-        list={list}
-        onToggleLike={() => toggleLikeMutation.mutate()}
-        isLiking={toggleLikeMutation.isPending}
-        canShare={canShare}
-      />
-
       <div className="mx-auto max-w-4xl px-4 py-8">
-        <div className="mb-8">
+        <ListHeader
+          list={list}
+          onToggleLike={() => toggleLikeMutation.mutate()}
+          isLiking={toggleLikeMutation.isPending}
+          canShare={canShare}
+        />
+
+        <div className="mt-8">
           <ListOwnerCard user={list.user} />
         </div>
 

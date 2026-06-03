@@ -30,8 +30,8 @@ export default function PublicListsPage() {
 
   return (
     <div className="min-h-screen bg-surface">
-      <div className="border-b border-white/10 bg-surface-raised">
-        <div className="mx-auto max-w-6xl px-4 py-12">
+      <div className="mx-auto max-w-6xl px-4 pt-8">
+        <div className="rounded-2xl border border-white/10 bg-surface-raised px-8 py-12">
           <h1 className="text-4xl font-bold text-ink">🎬 {t('nav.lists', 'Listeler')}</h1>
           <p className="mt-2 text-lg text-ink-muted">
             Kullanıcıların oluşturduğu ve beğendiği en iyi film ve dizi listeleri

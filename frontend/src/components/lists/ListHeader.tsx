@@ -25,8 +25,8 @@ export function ListHeader({ list, onToggleLike, isLiking, canShare }: Props) {
   };
 
   return (
-    <div className="border-b border-white/10 bg-surface-raised">
-      <div className="mx-auto max-w-4xl px-4 py-8">
+    <div className="rounded-2xl border border-white/10 bg-surface-raised">
+      <div className="px-6 py-8">
         <div className="mb-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
