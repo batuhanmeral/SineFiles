@@ -3,24 +3,15 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { poster } from '@/lib/tmdb';
-import { listsApi, type UserListSummary } from '@/api/lists.api';
+import { listsApi } from '@/api/lists.api';
 import { listDisplayName } from '@/features/list/listLabels';
-
-// Sistem listesi ikonları ve sabit gösterim sırası
-const systemEmoji: Record<string, string> = {
-  WATCHED: '✅',
-  WATCHLIST: '📋',
-  FAVORITES: '❤️',
-};
-const SYSTEM_ORDER = ['WATCHED', 'WATCHLIST', 'FAVORITES'] as const;
 
 // Profilde gösterilecek azami CUSTOM liste sayısı (fazlası "Tümünü göster" ile)
 const CUSTOM_PREVIEW = 3;
 
-// Profil sayfasında kullanıcının listeleri.
-// Zorunlu sistem listeleri (İzlenenler/İzleme Listesi/Favoriler) üstte ikon kısayolları
-// olarak; kullanıcının kendi (CUSTOM) listeleri kart olarak, en fazla 3 — gerisi
-// "Tümünü göster" ile açılır. Başkası bakıyorsa yalnızca herkese açık listeler gelir.
+// Profil sayfasında kullanıcının kendi (CUSTOM) listeleri kart olarak, en fazla 3 —
+// gerisi "Tümünü göster" ile açılır. Sistem listeleri üstteki istatistik kısayollarında.
+// Başkası bakıyorsa yalnızca herkese açık listeler gelir.
 export function ProfileListsSection({ username }: { username: string }) {
   const { t } = useTranslation();
   const [showAll, setShowAll] = useState(false);
@@ -31,37 +22,15 @@ export function ProfileListsSection({ username }: { username: string }) {
     enabled: Boolean(username),
   });
 
-  const all = lists ?? [];
-  // Sistem listeleri sabit sırada
-  const system = SYSTEM_ORDER.map((ty) => all.find((l) => l.type === ty)).filter(
-    (l): l is UserListSummary => Boolean(l),
-  );
-  const custom = all.filter((l) => l.type === 'CUSTOM');
+  const custom = (lists ?? []).filter((l) => l.type === 'CUSTOM');
 
-  if (system.length === 0 && custom.length === 0) return null;
+  if (custom.length === 0) return null;
 
   const shownCustom = showAll ? custom : custom.slice(0, CUSTOM_PREVIEW);
 
   return (
     <section className="mt-8">
       <h2 className="mb-3 font-display text-lg font-bold text-ink">Listeler</h2>
-
-      {/* Sistem listeleri — ikon kısayolları */}
-      {system.length > 0 && (
-        <div className="mb-5 flex flex-wrap gap-2">
-          {system.map((list) => (
-            <Link
-              key={list.id}
-              to={`/lists/${list.id}`}
-              className="flex items-center gap-2 rounded-xl border border-white/10 bg-surface-raised px-4 py-2 text-sm transition-all hover:border-white/20"
-            >
-              <span className="text-base">{systemEmoji[list.type]}</span>
-              <span className="font-medium text-ink">{listDisplayName(list, t)}</span>
-              <span className="text-xs text-ink-muted">{list.itemCount}</span>
-            </Link>
-          ))}
-        </div>
-      )}
 
       {/* CUSTOM listeler — kartlar (en fazla 3) */}
       {custom.length > 0 && (
