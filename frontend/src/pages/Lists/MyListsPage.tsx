@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { listsApi, type MyListSummary } from '@/api/lists.api';
-import { CreateListModal } from '@/components/lists/CreateListModal';
+import { CreateListModal, type EditableList } from '@/components/lists/CreateListModal';
 
 // Liste tipi → görünen etiket
 function typeLabel(type: MyListSummary['type'], title: string): string {
@@ -23,6 +23,7 @@ function typeLabel(type: MyListSummary['type'], title: string): string {
 export default function MyListsPage() {
   const qc = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
+  const [editing, setEditing] = useState<EditableList | null>(null);
 
   const { data: lists, isLoading, error } = useQuery({
     queryKey: ['my-lists'],
@@ -77,21 +78,38 @@ export default function MyListsPage() {
                 </div>
               </Link>
 
-              {/* Sadece CUSTOM listeler silinebilir */}
+              {/* Sadece CUSTOM listeler düzenlenebilir/silinebilir */}
               {list.type === 'CUSTOM' && (
-                <button
-                  onClick={() => {
-                    if (confirm(`"${list.title}" listesini silmek istediğine emin misin?`)) {
-                      deleteMutation.mutate(list.id);
+                <div className="absolute right-2 top-2 flex gap-1 opacity-0 transition-all group-hover:opacity-100">
+                  <button
+                    onClick={() =>
+                      setEditing({
+                        id: list.id,
+                        title: list.title,
+                        description: list.description,
+                        visibility: list.visibility,
+                      })
                     }
-                  }}
-                  disabled={deleteMutation.isPending}
-                  className="absolute right-3 top-3 rounded-md p-1 text-ink-muted opacity-0 transition-all hover:text-rating-low group-hover:opacity-100 disabled:opacity-40"
-                  aria-label="Listeyi sil"
-                  title="Listeyi sil"
-                >
-                  🗑️
-                </button>
+                    className="rounded-md p-1 text-ink-muted hover:text-accent"
+                    aria-label="Listeyi düzenle"
+                    title="Listeyi düzenle"
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (confirm(`"${list.title}" listesini silmek istediğine emin misin?`)) {
+                        deleteMutation.mutate(list.id);
+                      }
+                    }}
+                    disabled={deleteMutation.isPending}
+                    className="rounded-md p-1 text-ink-muted hover:text-rating-low disabled:opacity-40"
+                    aria-label="Listeyi sil"
+                    title="Listeyi sil"
+                  >
+                    🗑️
+                  </button>
+                </div>
               )}
             </div>
           ))}
@@ -99,6 +117,10 @@ export default function MyListsPage() {
       )}
 
       <CreateListModal open={createOpen} onClose={() => setCreateOpen(false)} />
+      {/* Koşullu mount → her açılışta alanlar mevcut listeden taze doldurulur */}
+      {editing && (
+        <CreateListModal open editList={editing} onClose={() => setEditing(null)} />
+      )}
     </div>
   );
 }
